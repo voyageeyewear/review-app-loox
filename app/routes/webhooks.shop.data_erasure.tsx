@@ -4,10 +4,12 @@ import { prisma } from "../db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    // Use Shopify's webhook authentication with HMAC verification
     const { topic, shop, payload } = await authenticate.webhook(request);
     
     console.log(`🏪 Shop Data Erasure - Shop: ${shop}, Topic: ${topic}`);
     
+    // Parse the payload
     const shopData = typeof payload === 'string' ? JSON.parse(payload) : payload;
     const shopDomain = shopData.shop_domain;
     
@@ -18,15 +20,29 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return new Response("Bad Request", { status: 400 });
     }
     
+    // Delete ALL shop data from our database
     const deletionResults = {
-      reviews: await prisma.review.deleteMany({ where: { shop } }),
-      reviewRequests: await prisma.reviewRequest.deleteMany({ where: { shop } }),
-      productGroups: await prisma.productGroup.deleteMany({ where: { shop } }),
-      emailSettings: await prisma.emailAutomationSettings.deleteMany({ where: { shop } }),
-      webhookLogs: await prisma.webhookLog.deleteMany({ where: { shop } }),
-      sessions: await prisma.session.deleteMany({ where: { shop } })
+      reviews: await prisma.review.deleteMany({ 
+        where: { shop } 
+      }),
+      reviewRequests: await prisma.reviewRequest.deleteMany({ 
+        where: { shop } 
+      }),
+      productGroups: await prisma.productGroup.deleteMany({ 
+        where: { shop } 
+      }),
+      emailSettings: await prisma.emailAutomationSettings.deleteMany({ 
+        where: { shop } 
+      }),
+      webhookLogs: await prisma.webhookLog.deleteMany({ 
+        where: { shop } 
+      }),
+      sessions: await prisma.session.deleteMany({ 
+        where: { shop } 
+      })
     };
     
+    // Log the deletion for compliance records
     console.log(`🗑️ Shop data erased:`, {
       shop,
       shopDomain,

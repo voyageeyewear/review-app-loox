@@ -4,6 +4,7 @@ import { prisma } from "../db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    // Use Shopify's webhook authentication with HMAC verification
     const { topic, shop, payload } = await authenticate.webhook(request);
     
     console.log(`📋 Customer Data Request - Shop: ${shop}, Topic: ${topic}`);

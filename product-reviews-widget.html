@@ -1,0 +1,186 @@
+<!-- ✅ COPY THIS CODE - Single Review Widget for Shopify Theme -->
+<!-- Place this in your product.liquid template where you want reviews to appear -->
+
+<div id="product-reviews-widget">
+    <style>
+        #product-reviews-widget {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+        
+        .reviews-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .reviews-summary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .reviews-stars {
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+        
+        .reviews-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        
+        .review-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-customer {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .review-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .review-text {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+            color: #374151;
+        }
+        
+        .write-review-btn {
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+        
+        .write-review-btn:hover {
+            background: #059669;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .reviews-empty {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+
+    <h3 class="reviews-title">Customer Reviews</h3>
+    
+    <div class="reviews-summary" style="display: none;">
+        <div class="reviews-stars"></div>
+        <span class="reviews-rating-text"></span>
+    </div>
+    
+    <div id="reviews-content">
+        <div class="reviews-loading">Loading reviews...</div>
+    </div>
+    
+    <!-- IMPORTANT: Replace YOUR_PRODUCT_ID with {{ product.id }} in your theme -->
+    <a href="https://04847e926845c853b6a67cd64caf0dc7.myshopifypreview.com/submit-review/{{ product.id }}" 
+       class="write-review-btn" target="_blank">
+        Write a Review
+    </a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // IMPORTANT: Replace YOUR_PRODUCT_ID with {{ product.id }} in your theme
+    const productId = '{{ product.id }}'; // This will be dynamic in your theme
+    const apiUrl = `https://04847e926845c853b6a67cd64caf0dc7.myshopifypreview.com/api/reviews?productId=${encodeURIComponent(productId)}&limit=10`;
+    
+    const content = document.getElementById('reviews-content');
+    const summary = document.querySelector('.reviews-summary');
+    
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.reviews && data.reviews.length > 0) {
+                content.innerHTML = '';
+                
+                // Show summary
+                if (data.summary && data.summary.totalReviews > 0) {
+                    const summaryStars = summary.querySelector('.reviews-stars');
+                    const summaryText = summary.querySelector('.reviews-rating-text');
+                    
+                    const rating = Math.round(data.summary.averageRating);
+                    summaryStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                    summaryText.textContent = `${data.summary.averageRating.toFixed(1)} (${data.summary.totalReviews} review${data.summary.totalReviews !== 1 ? 's' : ''})`;
+                    summary.style.display = 'flex';
+                }
+                
+                // Show reviews
+                const reviewsHtml = data.reviews.map(review => {
+                    const date = new Date(review.createdAt).toLocaleDateString();
+                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                    
+                    return `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-customer">${review.customerName}</div>
+                                <div class="review-date">${date}</div>
+                            </div>
+                            <div class="reviews-stars">${stars}</div>
+                            <div class="review-text">${review.reviewText}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                content.innerHTML = reviewsHtml;
+            } else {
+                content.innerHTML = `
+                    <div class="reviews-empty">
+                        No reviews yet. Be the first to review this product!
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reviews:', error);
+            content.innerHTML = `
+                <div class="reviews-empty">
+                    Unable to load reviews at this time.
+                </div>
+            `;
+        });
+});
+</script>
+
+<!-- End Review Widget --> 

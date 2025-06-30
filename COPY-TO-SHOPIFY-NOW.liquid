@@ -1,0 +1,102 @@
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 100%; margin: 30px 0; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #ffffff;">
+  <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">⭐ Customer Reviews</h3>
+  
+  <div id="connection-status" style="padding: 8px 12px; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem; background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6;">
+    🔗 Connecting to port 56790...
+  </div>
+  
+  <div class="reviews-summary" style="display: none; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 1.1rem;">
+    <div class="reviews-stars" style="color: #ffd700; font-size: 1.2rem;"></div>
+    <span class="reviews-rating-text"></span>
+  </div>
+  
+  <div id="reviews-content">
+    <div style="text-align: center; padding: 2rem; color: #6b7280; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">🔄 Loading reviews...</div>
+  </div>
+  
+  <a href="http://localhost:56790/submit-review/{{ product.id }}" 
+     style="background: #10b981; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; text-decoration: none; display: none; margin-top: 1rem; font-weight: 500;"
+     target="_blank" id="write-review-btn">
+    ✍️ Write a Review
+  </a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productId = '{{ product.id }}';
+  const apiUrl = 'http://localhost:56790/api/reviews?productId=' + productId + '&limit=10';
+  
+  const content = document.getElementById('reviews-content');
+  const summary = document.querySelector('.reviews-summary');
+  const statusEl = document.getElementById('connection-status');
+  const writeBtn = document.getElementById('write-review-btn');
+  
+  if (!productId) {
+    content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #dc2626;">❌ Product not found</div>';
+    return;
+  }
+  
+  fetch(apiUrl, { mode: 'cors' })
+    .then(function(response) {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    })
+    .then(function(data) {
+      if (!data.success) throw new Error('API Error');
+      
+      statusEl.textContent = '✅ Connected! Showing ' + data.summary.totalReviews + ' reviews (' + data.summary.averageRating.toFixed(1) + '⭐)';
+      statusEl.style.background = '#d1fae5';
+      statusEl.style.color = '#065f46';
+      writeBtn.style.display = 'inline-block';
+      
+      if (data.reviews && data.reviews.length > 0) {
+        let html = '';
+        
+        if (data.groupInfo && data.groupInfo.isGrouped) {
+          html += '<div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 14px; color: #1d4ed8;">📦 <strong>' + data.groupInfo.name + '</strong> - Reviews from ' + data.groupInfo.productIds.length + ' product variants</div>';
+        }
+        
+        if (data.summary && data.summary.totalReviews > 0) {
+          const summaryStars = summary.querySelector('.reviews-stars');
+          const summaryText = summary.querySelector('.reviews-rating-text');
+          
+          if (summaryStars && summaryText) {
+            const rating = Math.round(data.summary.averageRating);
+            summaryStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            summaryText.textContent = data.summary.averageRating.toFixed(1) + ' (' + data.summary.totalReviews + ' reviews)';
+            summary.style.display = 'flex';
+          }
+        }
+        
+        data.reviews.forEach(function(review) {
+          const date = new Date(review.createdAt).toLocaleDateString();
+          const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+          
+          let imagesHtml = '';
+          const images = review.mediaUrls || [];
+          
+          if (images.length > 0) {
+            imagesHtml = '<div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">';
+            images.forEach(function(url) {
+              imagesHtml += '<img src="' + url + '" style="width: 80px; height: 80px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #e5e7eb; transition: transform 0.2s;" onclick="window.open(\'' + url + '\', \'_blank\')" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
+            });
+            imagesHtml += '</div>';
+          }
+          
+          html += '<div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 0;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"><div style="font-weight: 600; color: #1f2937;">👤 ' + review.customerName + '</div><div style="color: #6b7280; font-size: 0.875rem;">' + date + '</div></div><div style="color: #ffd700; font-size: 1.2rem; margin-bottom: 0.5rem;">' + stars + '</div><div style="margin: 0.5rem 0; line-height: 1.6; color: #374151;">' + review.reviewText + '</div>' + imagesHtml + '</div>';
+        });
+        
+        content.innerHTML = html;
+      } else {
+        content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">No reviews yet. Be the first to review this product!</div>';
+      }
+    })
+    .catch(function(error) {
+      console.error('Error loading reviews:', error);
+      statusEl.textContent = '❌ Connection failed - Server not running on port 56790';
+      statusEl.style.background = '#fee2e2';
+      statusEl.style.color = '#dc2626';
+      content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #dc2626;">❌ Unable to connect to review server<br><strong>Is your dev server running?</strong><br>Expected: http://localhost:56790</div>';
+    });
+});
+</script> 

@@ -1,0 +1,339 @@
+<!-- 
+  📋 COPY THIS ENTIRE FILE TO YOUR SHOPIFY THEME
+  🎯 This version is updated with current port 54623
+  ⏰ Updated: June 28, 2025 at 2:00 PM
+-->
+
+<div class="product-reviews-widget-dynamic" data-product-id="{{ product.id }}">
+  <style>
+    .product-reviews-widget-dynamic {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 100%;
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    
+    .reviews-title-dynamic {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+    
+    .reviews-summary-dynamic {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .reviews-stars-dynamic {
+      color: #ffd700;
+      font-size: 1.2rem;
+    }
+    
+    .reviews-loading-dynamic, .reviews-empty-dynamic {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+      background: #f9fafb;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .review-item-dynamic {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 0;
+    }
+    
+    .review-item-dynamic:last-child {
+      border-bottom: none;
+    }
+    
+    .review-header-dynamic {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .review-customer-dynamic {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .review-date-dynamic {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+    
+    .review-text-dynamic {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+      color: #374151;
+    }
+    
+    .review-images-dynamic {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .review-image-dynamic {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    
+    .write-review-btn-dynamic {
+      background: #10b981;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+    
+    .write-review-btn-dynamic:hover {
+      background: #059669;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .port-debug-dynamic {
+      background: #10b981;
+      border: 1px solid #059669;
+      color: white;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+    
+    .group-info-dynamic {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #1d4ed8;
+    }
+    
+    @media (max-width: 768px) {
+      .product-reviews-widget-dynamic {
+        padding: 1rem;
+      }
+      
+      .review-header-dynamic {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+    }
+  </style>
+
+  <h3 class="reviews-title-dynamic">⭐ Customer Reviews</h3>
+  
+  <div class="reviews-summary-dynamic">
+    <div class="reviews-stars-dynamic"></div>
+    <span class="reviews-rating-text-dynamic"></span>
+  </div>
+  
+  <div id="reviews-content-dynamic">
+    <div class="reviews-loading-dynamic">🔄 Loading reviews...</div>
+  </div>
+  
+  <div id="write-review-section-dynamic" style="display: none;">
+    <a href="#" id="write-review-link-dynamic" class="write-review-btn-dynamic" target="_blank">
+      ✍️ Write a Review
+    </a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const widget = document.querySelector('.product-reviews-widget-dynamic');
+  const productId = widget?.getAttribute('data-product-id') || '{{ product.id }}';
+  const reviewsLimit = 10;
+  
+  const content = document.getElementById('reviews-content-dynamic');
+  const summary = document.querySelector('.reviews-summary-dynamic');
+  const writeReviewSection = document.getElementById('write-review-section-dynamic');
+  const writeReviewLink = document.getElementById('write-review-link-dynamic');
+  
+  // Only proceed if we have a product ID
+  if (!productId || productId === '') {
+    content.innerHTML = '<div class="reviews-empty-dynamic">❌ Product not found</div>';
+    return;
+  }
+  
+  console.log('🎯 DYNAMIC PORT WIDGET - Updated June 28, 2025');
+  
+  // Dynamic port detection and loading
+  async function loadReviewsWithDynamicPort() {
+    try {
+      // 🎯 UPDATED PORTS: Current working port 54623 is first!
+      const possiblePorts = [54623, 54692, 3457, 54627, 65434, 62720, 55547];
+       let workingPort = null;
+       let currentPort = 54623;
+      
+      // Try to find working port
+      for (const port of possiblePorts) {
+        try {
+          const portResponse = await fetch(`http://localhost:${port}/api/port-settings`);
+          if (portResponse.ok) {
+            const portData = await portResponse.json();
+            if (portData.success && portData.port) {
+              currentPort = portData.port;
+              workingPort = port;
+              console.log(`✅ Found working port: ${port}, configured port: ${currentPort}`);
+              break;
+            }
+          }
+        } catch (e) {
+          console.log(`❌ Port ${port} not working, trying next...`);
+        }
+      }
+      
+      if (!workingPort) {
+        // If no port responded to the port-settings API, try to find any working API
+        for (const port of possiblePorts) {
+          try {
+            const testResponse = await fetch(`http://localhost:${port}/api/reviews?productId=${productId}&limit=1`);
+            if (testResponse.ok) {
+              currentPort = port;
+              workingPort = port;
+              console.log(`✅ Found working API port: ${port}`);
+              break;
+            }
+          } catch (e) {
+            // Continue trying
+          }
+        }
+      }
+      
+      if (!workingPort) {
+        throw new Error('No working development server found');
+      }
+      
+      // Load reviews using the detected port
+      const apiUrl = `http://localhost:${currentPort}/api/reviews?productId=${encodeURIComponent(productId)}&limit=${reviewsLimit}`;
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`✅ Reviews loaded successfully from port ${currentPort}`, data);
+      
+      // Set write review link
+      if (writeReviewLink) {
+        writeReviewLink.href = `http://localhost:${currentPort}/submit-review/${productId}`;
+      }
+      
+      // Success! Load the reviews
+      if (data.success && data.reviews && data.reviews.length > 0) {
+        let html = `
+          <div class="port-debug-dynamic">
+            🎉 SUCCESS! Connected to port ${currentPort} - ${data.reviews.length} reviews loaded
+          </div>
+        `;
+        
+        // Show group info if product is grouped
+        if (data.groupInfo && data.groupInfo.isGrouped) {
+          html += `
+            <div class="group-info-dynamic">
+              📦 <strong>${data.groupInfo.name}</strong> - Reviews from ${data.groupInfo.productIds.length} product variants
+            </div>
+          `;
+        }
+        
+        // Show summary
+        if (summary && data.summary && data.summary.totalReviews > 0) {
+          const summaryStars = summary.querySelector('.reviews-stars-dynamic');
+          const summaryText = summary.querySelector('.reviews-rating-text-dynamic');
+          
+          if (summaryStars && summaryText) {
+            const rating = Math.round(data.summary.averageRating);
+            summaryStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            summaryText.textContent = `${data.summary.averageRating.toFixed(1)} (${data.summary.totalReviews} review${data.summary.totalReviews !== 1 ? 's' : ''})`;
+            summary.style.display = 'flex';
+          }
+        }
+        
+        // Show reviews
+        const reviewsHtml = data.reviews.map(review => {
+          const date = new Date(review.createdAt).toLocaleDateString();
+          const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+          
+          // Handle media images
+          const images = review.mediaUrls || [];
+          const imagesHtml = images.length > 0 ? `
+            <div class="review-images-dynamic">
+              ${images.map(url => `<img src="${url}" class="review-image-dynamic" onclick="window.open('${url}')">`).join('')}
+            </div>
+          ` : '';
+          
+          return `
+            <div class="review-item-dynamic">
+              <div class="review-header-dynamic">
+                <div class="review-customer-dynamic">👤 ${review.customerName}</div>
+                <div class="review-date-dynamic">${date}</div>
+              </div>
+              <div class="reviews-stars-dynamic">${stars}</div>
+              <div class="review-text-dynamic">${review.reviewText}</div>
+              ${imagesHtml}
+            </div>
+          `;
+        }).join('');
+        
+        content.innerHTML = html + reviewsHtml;
+      } else {
+        content.innerHTML = `
+          <div class="port-debug-dynamic">
+            ✅ Connected to port ${currentPort} successfully
+          </div>
+          <div class="reviews-empty-dynamic">
+            <h3>😴 No Reviews Yet</h3>
+            <p>Be the first to write a review!</p>
+          </div>
+        `;
+      }
+      
+      if (writeReviewSection) {
+        writeReviewSection.style.display = 'block';
+      }
+      
+    } catch (error) {
+      console.error(`❌ Failed to load reviews:`, error);
+      
+      content.innerHTML = `
+        <div class="reviews-empty-dynamic">
+          ❌ Unable to connect to development server<br>
+          <strong>Tried ports: 54623, 54692, 3457, 54627, 65434, 62720, 55547</strong><br>
+          <small>Make sure your development server is running</small>
+        </div>
+      `;
+      
+      if (writeReviewSection) {
+        writeReviewSection.style.display = 'block';
+      }
+    }
+  }
+  
+  // Load reviews with dynamic port detection
+  loadReviewsWithDynamicPort();
+});
+</script> 

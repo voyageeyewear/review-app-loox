@@ -1,0 +1,294 @@
+<div class="product-reviews-section" id="product-reviews-{{ section.id }}">
+  <h3 class="reviews-title">⭐ Customer Reviews</h3>
+  
+  <div id="connection-status-{{ section.id }}" class="connection-status status-searching">
+    🔍 Searching for review server...
+  </div>
+  
+  <div class="reviews-summary">
+    <div class="reviews-stars"></div>
+    <span class="reviews-rating-text"></span>
+  </div>
+  
+  <div id="reviews-content-{{ section.id }}">
+    <div class="reviews-loading">🔄 Loading reviews...</div>
+  </div>
+  
+  <a href="#" id="write-review-link-{{ section.id }}" 
+     class="write-review-btn" target="_blank" style="display: none;">
+    ✍️ Write a Review
+  </a>
+</div>
+
+<style>
+  .product-reviews-section {
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 100%;
+    margin: 30px 0;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #ffffff;
+  }
+  
+  .reviews-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .reviews-summary {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .reviews-stars {
+    color: #ffd700;
+    font-size: 1.2rem;
+  }
+  
+  .reviews-loading, .reviews-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .connection-status {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  
+  .status-success { 
+    background: #d1fae5; 
+    color: #065f46; 
+    border: 1px solid #a7f3d0; 
+  }
+  
+  .status-searching { 
+    background: #fef3c7; 
+    color: #92400e; 
+    border: 1px solid #fbbf24; 
+  }
+  
+  .status-error { 
+    background: #fee2e2; 
+    color: #dc2626; 
+    border: 1px solid #fecaca; 
+  }
+  
+  .write-review-btn {
+    background: #10b981;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 1rem;
+    font-weight: 500;
+  }
+  
+  .write-review-btn:hover {
+    background: #059669;
+    text-decoration: none;
+    color: white;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sectionId = '{{ section.id }}';
+  const productId = '{{ product.id }}';
+  const reviewsLimit = 10;
+  
+  const content = document.getElementById('reviews-content-' + sectionId);
+  const summary = document.querySelector('#product-reviews-' + sectionId + ' .reviews-summary');
+  const writeReviewLink = document.getElementById('write-review-link-' + sectionId);
+  const statusEl = document.getElementById('connection-status-' + sectionId);
+  
+  if (!productId || productId === '') {
+    content.innerHTML = '<div class="reviews-empty">❌ Product not found</div>';
+    return;
+  }
+  
+  // Smart Port Detection System - Updated with current port
+  const commonPorts = [59690, 56790, 56853, 53479, 51021, 51088, 53850, 49327, 55848, 62454, 61154, 60525, 58561, 3000, 4000, 5000];
+  let lastWorkingPort = null;
+  
+  try {
+    lastWorkingPort = localStorage.getItem('reviewServerPort');
+  } catch (e) {
+    // LocalStorage not available
+  }
+  
+  async function detectActivePort() {
+    statusEl.textContent = '🔍 Smart port detection starting...';
+    statusEl.className = 'connection-status status-searching';
+    
+    const portsToTry = lastWorkingPort 
+      ? [lastWorkingPort].concat(commonPorts.filter(p => p != lastWorkingPort))
+      : commonPorts;
+    
+    for (let i = 0; i < portsToTry.length; i++) {
+      const port = portsToTry[i];
+      
+      statusEl.textContent = '🔍 Testing port ' + port + ' (' + (i + 1) + '/' + portsToTry.length + ')...';
+      
+      try {
+        const apiUrl = 'http://localhost:' + port + '/api/reviews?productId=' + encodeURIComponent(productId) + '&limit=' + reviewsLimit;
+        
+        const response = await fetch(apiUrl, {
+          mode: 'cors'
+        });
+        
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          statusEl.textContent = '✅ Connected to port ' + port;
+          statusEl.className = 'connection-status status-success';
+          
+          try {
+            localStorage.setItem('reviewServerPort', port);
+            localStorage.setItem('reviewServerLastSeen', new Date().toISOString());
+          } catch (e) {
+            // LocalStorage not available
+          }
+          
+          return { port: port, data: data, apiUrl: apiUrl };
+        }
+        
+      } catch (error) {
+        console.log('Port ' + port + ' failed: ' + error.message);
+      }
+    }
+    
+    throw new Error('No active review server found');
+  }
+  
+  // Main execution
+  detectActivePort()
+    .then(function(result) {
+      const port = result.port;
+      const data = result.data;
+      
+      const baseUrl = 'http://localhost:' + port;
+      if (writeReviewLink) {
+        writeReviewLink.href = baseUrl + '/submit-review/' + productId;
+        writeReviewLink.style.display = 'inline-block';
+      }
+      
+      if (data.reviews && data.reviews.length > 0) {
+        let html = '';
+        
+        if (data.groupInfo && data.groupInfo.isGrouped) {
+          html += '<div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 14px; color: #1d4ed8;">' +
+                  '📦 <strong>' + data.groupInfo.name + '</strong> - Reviews from ' + data.groupInfo.productIds.length + ' product variants' +
+                  '</div>';
+        }
+        
+        if (data.summary && data.summary.totalReviews > 0) {
+          const summaryStars = summary.querySelector('.reviews-stars');
+          const summaryText = summary.querySelector('.reviews-rating-text');
+          
+          if (summaryStars && summaryText) {
+            const rating = Math.round(data.summary.averageRating);
+            summaryStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            summaryText.textContent = data.summary.averageRating.toFixed(1) + ' (' + data.summary.totalReviews + ' review' + (data.summary.totalReviews !== 1 ? 's' : '') + ')';
+            summary.style.display = 'flex';
+          }
+        }
+        
+        const reviewsHtml = data.reviews.map(function(review) {
+          const date = new Date(review.createdAt).toLocaleDateString();
+          const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+          
+          const images = review.mediaUrls || [];
+          let imagesHtml = '';
+          
+          if (images.length > 0) {
+            imagesHtml = '<div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">';
+            images.forEach(function(url) {
+              imagesHtml += '<img src="' + url + '" ' +
+                           'style="width: 80px; height: 80px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #e5e7eb;" ' +
+                           'onclick="window.open(\'' + url + '\', \'_blank\')" ' +
+                           'alt="Review image by ' + review.customerName + '">';
+            });
+            imagesHtml += '</div>';
+          }
+          
+          return '<div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 0;">' +
+                 '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">' +
+                 '<div style="font-weight: 600; color: #1f2937;">👤 ' + review.customerName + '</div>' +
+                 '<div style="color: #6b7280; font-size: 0.875rem;">' + date + '</div>' +
+                 '</div>' +
+                 '<div style="color: #ffd700; font-size: 1.2rem;">' + stars + '</div>' +
+                 '<div style="margin: 0.5rem 0; line-height: 1.6; color: #374151;">' + review.reviewText + '</div>' +
+                 imagesHtml +
+                 '</div>';
+        }).join('');
+        
+        content.innerHTML = html + reviewsHtml;
+      } else {
+        content.innerHTML = '<div class="reviews-empty">No reviews yet. Be the first to review this product!</div>';
+      }
+    })
+    .catch(function(error) {
+      console.error('Smart port detection failed:', error);
+      
+      statusEl.textContent = '❌ No review server found - Make sure \'npm run dev\' is running';
+      statusEl.className = 'connection-status status-error';
+      
+      content.innerHTML = '<div class="reviews-empty">' +
+                         '❌ Unable to connect to review server<br>' +
+                         '<strong>Solution:</strong><br>' +
+                         '1. Run <code>npm run dev</code> in your terminal<br>' +
+                         '2. Refresh this page<br>' +
+                         '<small>Smart detection tried ports: 59690, 56790, 53479, and others</small>' +
+                         '</div>';
+      
+      if (writeReviewLink) {
+        writeReviewLink.style.display = 'inline-block';
+        writeReviewLink.href = '#';
+        writeReviewLink.onclick = function() { 
+          alert('Please start the development server first'); 
+        };
+      }
+    });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Smart Product Reviews",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Customer Reviews"
+    },
+    {
+      "type": "paragraph",
+      "content": "This smart widget automatically detects your development server port and connects to your review API. No manual port updates needed!"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Smart Product Reviews"
+    }
+  ]
+}
+{% endschema %}

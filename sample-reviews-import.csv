@@ -1,0 +1,16 @@
+productId,customerName,rating,reviewText,mediaUrls,approved,createdAt
+9038857732326,"John Smith",5,"Amazing product! Love the quality and design. Fast shipping and excellent customer service.","",true,2025-06-29T10:00:00Z
+9038857732327,"Sarah Johnson",4,"Good value for money. Fast shipping too. Minor packaging issue but product is great.","",true,2025-06-28T15:30:00Z
+9038857732328,"Mike Wilson",5,"Outstanding! Exactly what I was looking for. Highly recommend to everyone.","https://example.com/image1.jpg",true,2025-06-27T09:15:00Z
+9038857732329,"Emily Davis",3,"Decent product but could be better. Quality is okay for the price range.","",false,2025-06-26T14:45:00Z
+9038857732326,"David Brown",5,"Excellent quality! Highly recommend to everyone. Will buy again for sure.","",true,2025-06-25T11:20:00Z
+9038857732330,"Lisa Wilson",4,"Very satisfied with the purchase. Good quality materials and nice finish.","",true,2025-06-24T16:10:00Z
+9038857732331,"Robert Garcia",5,"Perfect! Exceeded my expectations. Fast delivery and great packaging.","https://example.com/image2.jpg",true,2025-06-23T12:30:00Z
+9038857732332,"Jennifer Lee",4,"Nice product overall. Could improve the user manual but works perfectly.","",true,2025-06-22T08:45:00Z
+9038857732333,"Michael Chen",2,"Not what I expected. Quality could be much better for this price point.","",false,2025-06-21T19:20:00Z
+9038857732334,"Amanda Rodriguez",5,"Fantastic! Love everything about it. Great design and functionality.","",true,2025-06-20T13:55:00Z
+9038857732335,"Christopher Taylor",4,"Good product. Arrived quickly and well packaged. Minor issues but overall satisfied.","",true,2025-06-19T10:15:00Z
+9038857732336,"Jessica Moore",5,"Absolutely perfect! Better than described. Will definitely order again.","https://example.com/image3.jpg",true,2025-06-18T14:40:00Z
+9038857732337,"Daniel Anderson",3,"Average product. Does what it's supposed to do but nothing special.","",true,2025-06-17T11:25:00Z
+9038857732338,"Ashley Thomas",5,"Excellent quality and service! Highly recommend this product to others.","",true,2025-06-16T17:30:00Z
+9038857732339,"Matthew Jackson",4,"Very good product. Minor delivery delay but worth the wait.","",true,2025-06-15T09:50:00Z 

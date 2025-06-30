@@ -1,0 +1,285 @@
+<!-- Product Reviews Widget - Add this to your product page template -->
+<div id="product-reviews-widget" data-product-id="{{ product.id }}">
+  <style>
+    #product-reviews-widget {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 20px 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background: #ffffff;
+    }
+    
+    .reviews-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1f2937;
+    }
+    
+    .reviews-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+    }
+    
+    .reviews-stars {
+      color: #fbbf24;
+      font-size: 18px;
+    }
+    
+    .group-info {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #1d4ed8;
+    }
+    
+    .reviews-loading {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+    }
+    
+    .reviews-error {
+      text-align: center;
+      padding: 40px;
+      color: #dc2626;
+      background: #fef2f2;
+      border-radius: 6px;
+    }
+    
+    .review-item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 0;
+    }
+    
+    .review-item:last-child {
+      border-bottom: none;
+    }
+    
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .review-customer {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .review-date {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .review-rating {
+      color: #fbbf24;
+      margin: 4px 0;
+    }
+    
+    .review-text {
+      margin: 12px 0;
+      line-height: 1.6;
+      color: #374151;
+    }
+    
+    .review-images {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .review-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    
+    .write-review-btn {
+      background: #3b82f6;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    
+    .write-review-btn:hover {
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+
+  <div class="reviews-title">⭐ Customer Reviews</div>
+  
+  <div id="reviews-content">
+    <div class="reviews-loading">🔍 Finding your review server...</div>
+  </div>
+  
+  <div id="write-review-section" style="display: none;">
+    <a href="#" id="write-review-link" class="write-review-btn">✍️ Write a Review</a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const widget = document.getElementById('product-reviews-widget');
+  const productId = widget.getAttribute('data-product-id');
+  const content = document.getElementById('reviews-content');
+  const writeReviewSection = document.getElementById('write-review-section');
+  const writeReviewLink = document.getElementById('write-review-link');
+  
+  console.log('🚀 Starting auto-port detection for product:', productId);
+  
+  function createStars(rating) {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  }
+  
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString();
+  }
+  
+  // Auto-detect working port by trying common ports
+  async function findWorkingPort() {
+    const commonPorts = [49694, 49701, 62920, 62913, 62978, 60141, 60148, 49217, 49224, 49272, 58064, 53850, 52683, 57057, 58561, 45000, 46000, 47000, 48000, 49000, 50000, 60000, 60001, 60002, 60003, 60004, 60005, 62000, 62001, 62002, 62003, 62004, 62005];
+    
+    content.innerHTML = `
+      <div class="reviews-loading">
+        🔍 Auto-detecting server port...<br>
+        <small>Trying ports: ${commonPorts.slice(0, 5).join(', ')}...</small>
+      </div>
+    `;
+    
+    for (const port of commonPorts) {
+      try {
+        const apiUrl = `http://localhost:${port}/api/reviews?productId=${encodeURIComponent(productId)}&limit=5`;
+        console.log(`🧪 Testing port ${port}...`);
+        
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        
+        if (data.success !== undefined) {
+          console.log(`✅ Found working server on port ${port}!`);
+          
+          // Set up write review link
+          writeReviewLink.href = `http://localhost:${port}/submit-review/${productId}`;
+          writeReviewLink.target = '_blank';
+          
+          return { port, apiUrl, data };
+        }
+      } catch (error) {
+        console.log(`❌ Port ${port} failed:`, error.message);
+      }
+    }
+    
+    return null;
+  }
+  
+  // Main function to load reviews
+  async function loadReviews() {
+    const result = await findWorkingPort();
+    
+    if (!result) {
+      content.innerHTML = `
+        <div class="reviews-error">
+          <h3>🚫 Development Server Not Found</h3>
+          <div style="font-size: 14px; line-height: 1.4;">
+            <strong>To display reviews:</strong><br>
+            1. Open terminal in your project folder<br>
+            2. Run: <code>npm run dev</code><br>
+            3. Wait for server to start<br>
+            4. Refresh this page<br><br>
+            <small>Tried ports: 49272, 58064, 53850, 52683, 57057...</small>
+          </div>
+        </div>
+      `;
+      writeReviewSection.style.display = 'block';
+      return;
+    }
+    
+    const { port, apiUrl, data } = result;
+    
+    if (data.reviews && data.reviews.length > 0) {
+      let html = `
+        <div style="background: #d1fae5; border: 1px solid #a7f3d0; color: #065f46; padding: 0.5rem; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem;">
+          ✅ <strong>Connected!</strong> Found ${data.reviews.length} reviews on port ${port}<br>
+          <small>Server: http://localhost:${port}</small>
+        </div>
+      `;
+      
+      // Summary
+      const summary = data.summary || {};
+      html += `
+        <div class="reviews-summary">
+          <div class="reviews-stars">${createStars(Math.round(summary.averageRating || 0))}</div>
+          <div>${(summary.averageRating || 0).toFixed(1)} out of 5 stars (${summary.totalReviews || 0} reviews)</div>
+        </div>
+      `;
+      
+      // Group info
+      if (data.groupInfo && data.groupInfo.isGrouped) {
+        html += `
+          <div class="group-info">
+            📦 <strong>${data.groupInfo.name}</strong> - Reviews from ${data.groupInfo.productIds.length} product variants
+          </div>
+        `;
+      }
+      
+      // Reviews
+      data.reviews.forEach(review => {
+        const images = review.mediaUrls || [];
+        const imagesHtml = images.length > 0 ? `
+          <div class="review-images">
+            ${images.map(url => `<img src="${url}" class="review-image" onclick="window.open('${url}')">`).join('')}
+          </div>
+        ` : '';
+        
+        html += `
+          <div class="review-item">
+            <div class="review-header">
+              <div class="review-customer">👤 ${review.customerName}</div>
+              <div class="review-date">${formatDate(review.createdAt)}</div>
+            </div>
+            <div class="review-rating">${createStars(review.rating)}</div>
+            <div class="review-text">${review.reviewText}</div>
+            ${imagesHtml}
+          </div>
+        `;
+      });
+      
+      content.innerHTML = html;
+    } else {
+      content.innerHTML = `
+        <div style="background: #d1fae5; border: 1px solid #a7f3d0; color: #065f46; padding: 0.5rem; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem;">
+          ✅ Connected to development server on port ${port}
+        </div>
+        <div style="text-align: center; padding: 40px; color: #6b7280;">
+          <h3>😴 No Reviews Yet</h3>
+          <p>Be the first to write a review!</p>
+        </div>
+      `;
+    }
+    
+    writeReviewSection.style.display = 'block';
+  }
+  
+  // Start loading reviews
+  loadReviews();
+});
+</script> 

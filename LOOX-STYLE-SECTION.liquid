@@ -1,0 +1,395 @@
+<div class="loox-reviews-section" id="loox-reviews-{{ section.id }}">
+  <style>
+    .loox-reviews-section {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
+      padding: {{ section.settings.padding }}px;
+    }
+    
+    .loox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .loox-summary {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.1rem;
+    }
+    
+    .loox-stars {
+      color: {{ section.settings.star_color }};
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+    }
+    
+    .loox-count {
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .loox-write-btn {
+      background: {{ section.settings.button_color }};
+      color: white;
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .loox-write-btn:hover {
+      background: {{ section.settings.button_hover_color }};
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-decoration: none;
+      color: white;
+    }
+    
+    .loox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      align-items: start;
+    }
+    
+    .loox-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      break-inside: avoid;
+      margin-bottom: 1.5rem;
+    }
+    
+    .loox-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .loox-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #f8f9fa;
+    }
+    
+    .loox-content {
+      padding: 1.25rem;
+    }
+    
+    .loox-customer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .loox-name {
+      font-weight: 600;
+      color: #1a1a1a;
+      font-size: 0.95rem;
+    }
+    
+    .loox-verified {
+      color: {{ section.settings.star_color }};
+      font-size: 1rem;
+    }
+    
+    .loox-date {
+      color: #888;
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+    
+    .loox-rating {
+      color: {{ section.settings.star_color }};
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: 1px;
+    }
+    
+    .loox-text {
+      color: #333;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    
+    .loox-loading, .loox-empty {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 12px;
+      font-size: 1.1rem;
+    }
+    
+    .loox-debug {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    
+    /* Masonry effect for larger screens */
+    @media (min-width: 768px) {
+      .loox-grid {
+        column-count: 2;
+        column-gap: 1.5rem;
+        grid-template-columns: none;
+      }
+      
+      .loox-card {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 1.5rem;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .loox-grid {
+        column-count: 3;
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      .loox-grid {
+        column-count: 4;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .loox-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      
+      .loox-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <div class="loox-header">
+    <div class="loox-summary">
+      <div class="loox-stars" id="header-stars-{{ section.id }}"></div>
+      <div class="loox-count" id="header-count-{{ section.id }}">Loading reviews...</div>
+    </div>
+    
+    {% if section.settings.show_write_button %}
+      <a href="http://localhost:56790/submit-review/{{ product.id }}" 
+         class="loox-write-btn" target="_blank">
+        {{ section.settings.button_text }}
+      </a>
+    {% endif %}
+  </div>
+  
+  <div id="loox-content-{{ section.id }}">
+    <div class="loox-loading">🔄 Loading amazing reviews...</div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sectionId = '{{ section.id }}';
+  const productId = '{{ product.id }}';
+  const reviewsLimit = {{ section.settings.reviews_limit }};
+  
+  const apiUrl = `http://localhost:56790/api/reviews?productId=${encodeURIComponent(productId)}&limit=${reviewsLimit}`;
+  
+  const content = document.getElementById(`loox-content-${sectionId}`);
+  const headerStars = document.getElementById(`header-stars-${sectionId}`);
+  const headerCount = document.getElementById(`header-count-${sectionId}`);
+  
+  if (!productId || productId === '') {
+    content.innerHTML = '<div class="loox-empty">❌ Product not found</div>';
+    return;
+  }
+  
+  console.log(`🚀 Loading Loox-style reviews from: ${apiUrl}`);
+  
+  fetch(apiUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('✅ Reviews loaded successfully:', data);
+      
+      if (data.success && data.reviews && data.reviews.length > 0) {
+        // Update header
+        if (data.summary && data.summary.totalReviews > 0) {
+          const rating = Math.round(data.summary.averageRating);
+          headerStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+          headerCount.textContent = `${data.summary.totalReviews} Review${data.summary.totalReviews !== 1 ? 's' : ''}`;
+        }
+        
+        // Create grid
+        const gridHtml = `
+          <div class="loox-debug">
+            ✨ Displaying ${data.reviews.length} reviews in beautiful Loox-style layout
+          </div>
+          <div class="loox-grid">
+            ${data.reviews.map(review => {
+              const date = new Date(review.createdAt).toLocaleDateString('en-US', { 
+                month: 'numeric', 
+                day: 'numeric', 
+                year: 'numeric' 
+              });
+              const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+              
+              return `
+                <div class="loox-card">
+                  ${review.mediaUrls ? `
+                    <img src="${review.mediaUrls}" alt="${review.customerName}" class="loox-image" loading="lazy" />
+                  ` : ''}
+                  <div class="loox-content">
+                    <div class="loox-customer">
+                      <span class="loox-name">${review.customerName}</span>
+                      <span class="loox-verified">✓</span>
+                      <span class="loox-date">${date}</span>
+                    </div>
+                    <div class="loox-rating">${stars}</div>
+                    <p class="loox-text">${review.reviewText}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        
+        content.innerHTML = gridHtml;
+      } else {
+        content.innerHTML = `
+          <div class="loox-empty">
+            <h3>No reviews yet</h3>
+            <p>Be the first to share your experience!</p>
+          </div>
+        `;
+        headerCount.textContent = '0 Reviews';
+        headerStars.innerHTML = '☆☆☆☆☆';
+      }
+    })
+    .catch(error => {
+      console.error('❌ Error loading reviews:', error);
+      content.innerHTML = `
+        <div class="loox-empty">
+          ❌ Unable to load reviews<br>
+          <small>${error.message}</small>
+        </div>
+      `;
+      headerCount.textContent = 'Error loading reviews';
+    });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Product Reviews (Loox Style)",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "range",
+      "id": "reviews_limit",
+      "label": "Number of Reviews to Show",
+      "min": 6,
+      "max": 50,
+      "step": 2,
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "show_write_button",
+      "label": "Show Write Review Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Write a review"
+    },
+    {
+      "type": "header",
+      "content": "Style Settings"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#2563eb"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button Hover Color",
+      "default": "#1d4ed8"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Top Margin",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Bottom Margin",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Side Padding",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "default": 20,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Reviews (Loox Style)"
+    }
+  ]
+}
+{% endschema %} 

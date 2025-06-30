@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id            String   @id
+  shop          String
+  state         String
+  isOnline      Boolean
+  scope         String?
+  expires       DateTime?
+  accessToken   String?
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean?
+  locale        String?
+  collaborator  Boolean?
+  emailVerified Boolean?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ProductGroup {
+  id          Int      @id @default(autoincrement())
+  shop        String
+  name        String
+  description String?
+  productIds  String   // JSON array of product IDs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  reviews     Review[]
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  shop         String
+  productId    String
+  customerName String
+  rating       Int
+  reviewText   String
+  mediaUrls    String
+  approved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  
+  // Product Group relationship (optional)
+  productGroupId Int?
+  productGroup   ProductGroup? @relation(fields: [productGroupId], references: [id])
+}
+
+// New models for email automation
+model ReviewRequest {
+  id                Int      @id @default(autoincrement())
+  shop              String
+  orderId           String   // Shopify order ID
+  orderNumber       String   // Human readable order number
+  customerEmail     String
+  customerPhone     String?
+  customerName      String
+  productIds        String   // JSON array of product IDs from the order
+  deliveryDate      DateTime // When order was marked as delivered
+  scheduledSendDate DateTime // When to send the review request
+  status           String   // "pending", "sent", "failed", "cancelled"
+  emailSent        Boolean  @default(false)
+  whatsappSent     Boolean  @default(false)
+  emailProvider    String?  // "klaviyo", "omnisend", "kwik-engage", etc.
+  errorMessage     String?  // If sending failed
+  sentAt           DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@unique([shop, orderId]) // Prevent duplicate review requests for same order
+}
+
+model EmailAutomationSettings {
+  id                    Int      @id @default(autoincrement())
+  shop                  String   @unique
+  enabled               Boolean  @default(true)
+  deliveryTagName       String   @default("delivered") // Tag name to look for
+  delayDays             Int      @default(3) // Days to wait after delivery before sending
+  delayHours            Int      @default(0) // Hours to wait (in addition to days)
+  delaySeconds          Int      @default(0) // Seconds to wait (in addition to days/hours)
+  emailProvider         String   @default("klaviyo") // "klaviyo", "omnisend", "kwik-engage"
+  whatsappProvider      String?  // "wati", "gallabox", etc.
+  emailSubject          String   @default("How was your recent purchase?")
+  emailTemplate         String?  // Custom email template
+  whatsappTemplate      String?  // Custom WhatsApp template
+  apiKey                String?  // Provider API key (encrypted)
+  whatsappApiKey        String?  // WhatsApp provider API key (encrypted)
+  webhookSecret         String?  // For validating webhooks
+  maxReminders          Int      @default(1) // Maximum follow-up emails
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model WebhookLog {
+  id          Int      @id @default(autoincrement())
+  shop        String
+  webhookType String   // "order/updated", "order/paid", etc.
+  orderId     String?
+  payload     String   // JSON payload from Shopify
+  processed   Boolean  @default(false)
+  success     Boolean  @default(false)
+  errorMessage String?
+  createdAt   DateTime @default(now())
+}
+

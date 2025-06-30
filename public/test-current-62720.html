@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>✅ Port 62720 Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; margin: 10px 0; }
+        .error { background: #fef2f2; color: #dc2626; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎯 NEW Port Test: 62720</h1>
+    <div id="test-result">🔍 Testing port 62720...</div>
+    
+    <script>
+        async function testCurrentPort() {
+            try {
+                const response = await fetch('http://localhost:62720/api/reviews?productId=9038857732326&limit=3');
+                const data = await response.json();
+                
+                if (data.success && data.reviews) {
+                    document.getElementById('test-result').innerHTML = `
+                        <div class="success">
+                            🎉 <strong>PORT 62720 WORKING PERFECTLY!</strong><br>
+                            Reviews found: ${data.reviews.length}<br>
+                            Total reviews: ${data.summary?.totalReviews || 0}<br>
+                            Average rating: ${(data.summary?.averageRating || 0).toFixed(1)}★<br>
+                            <br>
+                            <strong>✅ Now update your Port Settings dashboard with: 62720</strong>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                document.getElementById('test-result').innerHTML = `
+                    <div class="error">
+                        ❌ Port 62720 failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        testCurrentPort();
+    </script>
+</body>
+</html> 

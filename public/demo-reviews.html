@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Widget Demo - Product 9038857732326</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .demo-product {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .product-id {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🌟 Review Widget Demo</h1>
+        <p>This is a preview of how your reviews will look on your product page.</p>
+        <p><strong>Product ID:</strong> 9038857732326</p>
+    </div>
+
+    <div class="demo-product">
+        <h2 class="product-title">Sample Product</h2>
+        <p class="product-id">Product ID: 9038857732326</p>
+        <p>This is how your review widget will appear on your actual product page.</p>
+        
+        <!-- Review Widget -->
+        <div id="product-reviews-widget">
+            <style>
+                #product-reviews-widget {
+                    margin: 2rem 0;
+                    font-family: system-ui, -apple-system, sans-serif;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 1.5rem;
+                    background: white;
+                }
+                
+                .reviews-title {
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    margin-bottom: 1rem;
+                    color: #1f2937;
+                }
+                
+                .reviews-summary {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                    font-size: 1.1rem;
+                }
+                
+                .reviews-stars {
+                    color: #ffd700;
+                    font-size: 1.2rem;
+                }
+                
+                .reviews-loading {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #6b7280;
+                }
+                
+                .review-item {
+                    border-bottom: 1px solid #e5e7eb;
+                    padding: 1rem 0;
+                }
+                
+                .review-item:last-child {
+                    border-bottom: none;
+                }
+                
+                .review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .review-customer {
+                    font-weight: 600;
+                    color: #1f2937;
+                }
+                
+                .review-date {
+                    color: #6b7280;
+                    font-size: 0.875rem;
+                }
+                
+                .review-text {
+                    margin: 0.5rem 0;
+                    line-height: 1.6;
+                    color: #374151;
+                }
+                
+                .write-review-btn {
+                    background: #3b82f6;
+                    color: white;
+                    padding: 0.75rem 1.5rem;
+                    border: none;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin-top: 1rem;
+                    font-weight: 500;
+                }
+                
+                .write-review-btn:hover {
+                    background: #2563eb;
+                    color: white;
+                    text-decoration: none;
+                }
+                
+                .reviews-empty {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #6b7280;
+                }
+                
+                .api-info {
+                    background: #f3f4f6;
+                    padding: 1rem;
+                    border-radius: 6px;
+                    margin-top: 1rem;
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                }
+            </style>
+
+            <h3 class="reviews-title">Customer Reviews</h3>
+            
+            <div class="reviews-summary" style="display: none;">
+                <div class="reviews-stars"></div>
+                <span class="reviews-rating-text"></span>
+            </div>
+            
+            <div id="reviews-content">
+                <div class="reviews-loading">Loading reviews...</div>
+            </div>
+            
+            <a href="/submit-review/9038857732326" class="write-review-btn" target="_blank">
+                Write a Review
+            </a>
+            
+            <div class="api-info">
+                <strong>API Status:</strong> <span id="api-status">Testing...</span><br>
+                <strong>API URL:</strong> <span id="api-url">/api/reviews?productId=9038857732326</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productId = '9038857732326';
+        const apiUrl = `/api/reviews?productId=${encodeURIComponent(productId)}&limit=10`;
+        
+        const content = document.getElementById('reviews-content');
+        const summary = document.querySelector('.reviews-summary');
+        const apiStatus = document.getElementById('api-status');
+        const apiUrlSpan = document.getElementById('api-url');
+        
+        // Update API URL display
+        apiUrlSpan.textContent = apiUrl;
+        
+        fetch(apiUrl)
+            .then(response => {
+                apiStatus.textContent = `${response.status} ${response.statusText}`;
+                apiStatus.style.color = response.ok ? '#059669' : '#dc2626';
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Reviews loaded:', data);
+                apiStatus.textContent = 'Success! API working correctly';
+                apiStatus.style.color = '#059669';
+                
+                if (data.success && data.reviews && data.reviews.length > 0) {
+                    // Show summary
+                    if (data.summary && data.summary.totalReviews > 0) {
+                        const summaryStars = summary.querySelector('.reviews-stars');
+                        const summaryText = summary.querySelector('.reviews-rating-text');
+                        
+                        const rating = Math.round(data.summary.averageRating);
+                        summaryStars.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                        summaryText.textContent = `${data.summary.averageRating.toFixed(1)} (${data.summary.totalReviews} review${data.summary.totalReviews !== 1 ? 's' : ''})`;
+                        summary.style.display = 'flex';
+                    }
+                    
+                    // Show reviews
+                    const reviewsHtml = data.reviews.map(review => {
+                        const date = new Date(review.createdAt).toLocaleDateString();
+                        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                        
+                        return `
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="review-customer">${review.customerName}</div>
+                                    <div class="review-date">${date}</div>
+                                </div>
+                                <div class="reviews-stars">${stars}</div>
+                                <div class="review-text">${review.reviewText}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    content.innerHTML = reviewsHtml;
+                } else {
+                    content.innerHTML = `
+                        <div class="reviews-empty">
+                            No reviews found for this product.
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading reviews:', error);
+                apiStatus.textContent = `Error: ${error.message}`;
+                apiStatus.style.color = '#dc2626';
+                content.innerHTML = `
+                    <div class="reviews-empty">
+                        Unable to load reviews: ${error.message}
+                    </div>
+                `;
+            });
+    });
+    </script>
+</body>
+</html> 

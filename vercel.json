@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "remix",
+  "env": {
+    "NODE_ENV": "production",
+    "SHOPIFY_API_KEY": "04847e926845c853b6a67cd64caf0dc7"
+  }
+} 

@@ -2,7 +2,7 @@
   "name": "review-app-loox",
   "private": true,
   "scripts": {
-    "build": "remix vite:build",
+    "build": "prisma generate && remix vite:build",
         "dev": "node auto-update-ports.mjs",
     "dev-manual": "shopify app dev",
     "dev-clean": "pkill -f 'shopify app dev' || true && npm run dev",

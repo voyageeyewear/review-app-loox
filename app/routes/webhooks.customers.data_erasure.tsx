@@ -1,16 +1,16 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import { prisma } from "../db.server";
+import { prisma as db } from "../utils/db.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export async function action({ request }: ActionFunctionArgs) {
   try {
-    // Use Shopify's webhook authentication with HMAC verification
-    const { topic, shop, payload } = await authenticate.webhook(request);
+    // Authenticate the webhook with HMAC verification
+    const { shop, payload } = await authenticate.webhook(request);
     
-    console.log(`🗑️ Customer Data Erasure - Shop: ${shop}, Topic: ${topic}`);
+    console.log(`🗑️ Customer Data Erasure - Shop: ${shop}`);
     
     // Parse the payload
-    const customerData = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    const customerData = payload as any;
     const customerId = customerData.customer?.id;
     const customerEmail = customerData.customer?.email;
     
@@ -23,12 +23,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     
     // Delete all customer data from our database
     const deletionResults = {
-      reviews: await prisma.review.deleteMany({
+      reviews: await db.review.deleteMany({
         where: { 
           customerName: customerEmail
         }
       }),
-      reviewRequests: await prisma.reviewRequest.deleteMany({
+      reviewRequests: await db.reviewRequest.deleteMany({
         where: { 
           customerEmail: customerEmail
         }
@@ -52,4 +52,4 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     console.error("❌ Customer data erasure webhook error:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
-};
+}

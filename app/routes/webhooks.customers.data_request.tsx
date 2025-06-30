@@ -1,16 +1,16 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import { prisma } from "../db.server";
+import { prisma as db } from "../utils/db.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export async function action({ request }: ActionFunctionArgs) {
   try {
-    // Use Shopify's webhook authentication with HMAC verification
-    const { topic, shop, payload } = await authenticate.webhook(request);
+    // Authenticate the webhook with HMAC verification
+    const { shop, payload } = await authenticate.webhook(request);
     
-    console.log(`📋 Customer Data Request - Shop: ${shop}, Topic: ${topic}`);
+    console.log(`📋 Customer Data Request - Shop: ${shop}`);
     
     // Parse the payload
-    const customerData = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    const customerData = payload as any;
     const customerId = customerData.customer?.id;
     const customerEmail = customerData.customer?.email;
     
@@ -23,13 +23,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     
     // Gather all customer data from our database
     const customerDataInDb = {
-      reviews: await prisma.review.findMany({
+      reviews: await db.review.findMany({
         where: { 
-          // Reviews are linked by customerName, we'll search by email if it matches name
           customerName: customerEmail
         }
       }),
-      reviewRequests: await prisma.reviewRequest.findMany({
+      reviewRequests: await db.reviewRequest.findMany({
         where: { 
           customerEmail: customerEmail
         }
@@ -59,4 +58,4 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     console.error("❌ Customer data request webhook error:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
-}; 
+} 

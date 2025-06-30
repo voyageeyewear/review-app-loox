@@ -1,16 +1,16 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import { prisma } from "../db.server";
+import { prisma as db } from "../utils/db.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export async function action({ request }: ActionFunctionArgs) {
   try {
-    // Use Shopify's webhook authentication with HMAC verification
-    const { topic, shop, payload } = await authenticate.webhook(request);
+    // Authenticate the webhook with HMAC verification
+    const { shop, payload } = await authenticate.webhook(request);
     
-    console.log(`🏪 Shop Data Erasure - Shop: ${shop}, Topic: ${topic}`);
+    console.log(`🏪 Shop Data Erasure - Shop: ${shop}`);
     
     // Parse the payload
-    const shopData = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    const shopData = payload as any;
     const shopDomain = shopData.shop_domain;
     
     console.log(`🗑️ Erasing all data for shop: ${shop} (${shopDomain})`);
@@ -22,22 +22,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     
     // Delete ALL shop data from our database
     const deletionResults = {
-      reviews: await prisma.review.deleteMany({ 
+      reviews: await db.review.deleteMany({ 
         where: { shop } 
       }),
-      reviewRequests: await prisma.reviewRequest.deleteMany({ 
+      reviewRequests: await db.reviewRequest.deleteMany({ 
         where: { shop } 
       }),
-      productGroups: await prisma.productGroup.deleteMany({ 
+      productGroups: await db.productGroup.deleteMany({ 
         where: { shop } 
       }),
-      emailSettings: await prisma.emailAutomationSettings.deleteMany({ 
+      emailSettings: await db.emailAutomationSettings.deleteMany({ 
         where: { shop } 
       }),
-      webhookLogs: await prisma.webhookLog.deleteMany({ 
+      webhookLogs: await db.webhookLog.deleteMany({ 
         where: { shop } 
       }),
-      sessions: await prisma.session.deleteMany({ 
+      sessions: await db.session.deleteMany({ 
         where: { shop } 
       })
     };
@@ -62,4 +62,4 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     console.error("❌ Shop data erasure webhook error:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
-};
+}

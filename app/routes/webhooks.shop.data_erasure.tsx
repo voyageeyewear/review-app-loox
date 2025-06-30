@@ -60,6 +60,18 @@ export async function action({ request }: ActionFunctionArgs) {
     
   } catch (error) {
     console.error("❌ Shop data erasure webhook error:", error);
+    
+    // Check if it's an authentication/HMAC error
+    if (error instanceof Error && (
+      error.message.includes("Unauthorized") ||
+      error.message.includes("HMAC") ||
+      error.message.includes("Invalid webhook") ||
+      error.message.includes("authentication")
+    )) {
+      console.log("🔒 HMAC validation failed - returning 401");
+      return new Response("Unauthorized", { status: 401 });
+    }
+    
     return new Response("Internal Server Error", { status: 500 });
   }
 }

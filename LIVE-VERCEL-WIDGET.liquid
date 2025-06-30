@@ -1,0 +1,376 @@
+<!-- 
+  🌐 LIVE VERCEL WIDGET FOR SHOPIFY STORE
+  📋 COPY THIS ENTIRE CODE TO YOUR SHOPIFY PRODUCT TEMPLATE
+  🎯 Uses: https://review-app-loox.vercel.app
+  ⏰ Updated: June 30, 2025 - PRODUCTION READY
+-->
+
+<div class="product-reviews-widget-live" data-product-id="{{ product.id }}">
+  <style>
+    .product-reviews-widget-live {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 100%;
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    
+    .reviews-title-live {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .reviews-summary-live {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+    }
+    
+    .reviews-stars-live {
+      color: #fbbf24;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    
+    .reviews-stats-live {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .reviews-loading-live {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      font-size: 16px;
+      background: #f9fafb;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .reviews-empty-live {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      background: #f9fafb;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .reviews-error-live {
+      text-align: center;
+      padding: 40px;
+      color: #dc2626;
+      background: #fef2f2;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+    }
+    
+    .review-item-live {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 0;
+      animation: fadeInLive 0.5s ease-in;
+    }
+    
+    .review-item-live:last-child {
+      border-bottom: none;
+    }
+    
+    .review-header-live {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .review-customer-live {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 16px;
+    }
+    
+    .review-date-live {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .review-rating-live {
+      color: #fbbf24;
+      font-size: 16px;
+      margin: 4px 0;
+      letter-spacing: 1px;
+    }
+    
+    .review-text-live {
+      margin: 12px 0;
+      line-height: 1.6;
+      color: #374151;
+      font-size: 15px;
+    }
+    
+    .review-images-live {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .review-image-live {
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .review-image-live:hover {
+      transform: scale(1.05);
+    }
+    
+    .group-info-live {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #1d4ed8;
+    }
+    
+    .write-review-btn-live {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .write-review-btn-live:hover {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .live-status-live {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+    
+    @keyframes fadeInLive {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 640px) {
+      .product-reviews-widget-live {
+        margin: 10px;
+        padding: 15px;
+      }
+      
+      .review-header-live {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .reviews-summary-live {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+  </style>
+
+  <div class="live-status-live">
+    🌐 Live Reviews from Vercel
+  </div>
+
+  <h3 class="reviews-title-live">
+    ⭐ Customer Reviews
+  </h3>
+  
+  <div class="reviews-summary-live">
+    <div class="reviews-stars-live"></div>
+    <div class="reviews-stats-live"></div>
+  </div>
+  
+  <div id="reviews-content-live">
+    <div class="reviews-loading-live">
+      🔄 Loading reviews from live server...
+    </div>
+  </div>
+  
+  <div id="write-review-section-live" style="display: none;">
+    <a href="#" id="write-review-link-live" class="write-review-btn-live" target="_blank">
+      ✍️ Write a Review
+    </a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const widget = document.querySelector('.product-reviews-widget-live');
+  const productId = widget?.getAttribute('data-product-id') || '{{ product.id }}';
+  const content = document.getElementById('reviews-content-live');
+  const summary = document.querySelector('.reviews-summary-live');
+  const writeReviewSection = document.getElementById('write-review-section-live');
+  const writeReviewLink = document.getElementById('write-review-link-live');
+  
+  // Use live Vercel URL
+  const BASE_URL = 'https://review-app-loox.vercel.app';
+  const apiUrl = `${BASE_URL}/api/reviews?productId=${encodeURIComponent(productId)}&limit=10`;
+  
+  console.log('🌐 Loading reviews from live server:', BASE_URL);
+  console.log('📋 Product ID:', productId);
+  console.log('🔗 API URL:', apiUrl);
+  
+  // Set up write review link
+  if (writeReviewLink) {
+    writeReviewLink.href = `${BASE_URL}/submit-review/${productId}`;
+  }
+  
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  function createStars(rating) {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  }
+  
+  function displayReviews(data) {
+    let html = '';
+    
+    // Show summary if we have reviews
+    if (data.reviews && data.reviews.length > 0) {
+      const summaryData = data.summary || {};
+      const groupInfo = data.groupInfo || {};
+      
+      // Update summary section
+      if (summary && summaryData.totalReviews > 0) {
+        const summaryStars = summary.querySelector('.reviews-stars-live');
+        const summaryStats = summary.querySelector('.reviews-stats-live');
+        
+        if (summaryStars && summaryStats) {
+          summaryStars.innerHTML = createStars(Math.round(summaryData.averageRating || 0));
+          summaryStats.innerHTML = `${(summaryData.averageRating || 0).toFixed(1)} out of 5 stars (${summaryData.totalReviews || 0} reviews)`;
+          summary.style.display = 'flex';
+        }
+      }
+      
+      // Show group info if product is grouped
+      if (groupInfo.isGrouped) {
+        html += `
+          <div class="group-info-live">
+            📦 <strong>${groupInfo.name}</strong> - Reviews shared across ${groupInfo.productIds.length} product variants
+          </div>
+        `;
+      }
+      
+      // Display reviews
+      data.reviews.forEach(review => {
+        const images = review.mediaUrls || [];
+        const imagesHtml = images.length > 0 ? `
+          <div class="review-images-live">
+            ${images.map(url => `<img src="${url}" alt="Review image" class="review-image-live" onclick="window.open('${url}', '_blank')">`).join('')}
+          </div>
+        ` : '';
+        
+        html += `
+          <div class="review-item-live">
+            <div class="review-header-live">
+              <div class="review-customer-live">👤 ${review.customerName}</div>
+              <div class="review-date-live">📅 ${formatDate(review.createdAt)}</div>
+            </div>
+            <div class="review-rating-live">${createStars(review.rating)}</div>
+            <div class="review-text-live">${review.reviewText || 'No comment provided'}</div>
+            ${imagesHtml}
+          </div>
+        `;
+      });
+    } else {
+      html = `
+        <div class="reviews-empty-live">
+          <h3>😴 No Reviews Yet</h3>
+          <p>Be the first to write a review for this product!</p>
+        </div>
+      `;
+    }
+    
+    content.innerHTML = html;
+    if (writeReviewSection) {
+      writeReviewSection.style.display = 'block';
+    }
+  }
+  
+  function displayError(error) {
+    console.error('❌ Review loading error:', error);
+    content.innerHTML = `
+      <div class="reviews-error-live">
+        <h3>❌ Unable to Load Reviews</h3>
+        <p>Error: ${error.message}</p>
+        <p style="font-size: 12px; margin-top: 10px;">
+          Live URL: ${BASE_URL}<br>
+          API: ${apiUrl}
+        </p>
+      </div>
+    `;
+    if (writeReviewSection) {
+      writeReviewSection.style.display = 'block';
+    }
+  }
+  
+  // Fetch reviews from live server
+  fetch(apiUrl)
+    .then(response => {
+      console.log('📡 API Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('✅ Reviews loaded from live server:', data);
+      if (data.success) {
+        displayReviews(data);
+      } else {
+        throw new Error(data.error || 'Failed to load reviews');
+      }
+    })
+    .catch(error => {
+      displayError(error);
+    });
+});
+</script> 

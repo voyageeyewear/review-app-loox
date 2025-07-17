@@ -32,7 +32,7 @@ async function testServerReady() {
         console.log("=".repeat(45));
         console.log(`1. Go to: http://localhost:${port}/app/email-automation`);
         console.log("2. Select 'Interakt' from WhatsApp Provider");
-        console.log("3. Paste API Key: bDVDRnJXb1NUVmRxX0xTcTZBNVJBczJoQVFkOXhqWDVnaDAxUVQtU3NQazo=");
+        console.log("3. Paste API Key: [YOUR_INTERAKT_API_KEY_HERE]");
         console.log("4. Click 'Save Settings' (should work now!)");
         console.log("5. Click 'Test Connection'");
         console.log("6. Click 'Send Test WhatsApp' with +918852968844");

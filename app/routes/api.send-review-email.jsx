@@ -11,7 +11,7 @@ export async function action({ request }) {
     const { 
       reviewRequestId, 
       testEmail = null,
-      apiKey = "pk_a0ac9d2821d12915f87b72670dcf1096c1" // Your Klaviyo private API key
+      apiKey = process.env.KLAVIYO_API_KEY || "" // Klaviyo private API key from environment
     } = data;
 
     if (testEmail) {
@@ -126,7 +126,7 @@ export async function loader({ request }) {
       const emailService = new EmailService();
       const result = await emailService.testProvider(
         'klaviyo', 
-        'pk_a0ac9d2821d12915f87b72670dcf1096c1' // Your Klaviyo private API key
+        process.env.KLAVIYO_API_KEY || "" // Klaviyo private API key from environment
       );
 
       return json({

@@ -308,8 +308,8 @@ export default function EmailAutomation() {
                       
                       <TextField
                         label="Klaviyo Private API Key"
-                        value="pk_a0ac9d2821d12915f87b72670dcf1096c1"
-                        onChange={() => {}} // Read-only for now
+                        value={settings?.apiKey || ""}
+                        onChange={(value) => {}}
                         helpText="Your Klaviyo private API key (configured and ready!)"
                         disabled
                       />
